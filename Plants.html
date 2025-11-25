@@ -1,0 +1,1125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Scheduler Control Panel</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <style>
+    :root {
+      --bg: #0f172a;
+      --card-bg: #020617;
+      --accent: #38bdf8;
+      --accent-soft: rgba(56, 189, 248, 0.15);
+      --accent-soft-strong: rgba(56, 189, 248, 0.25);
+      --text: #e5e7eb;
+      --muted: #9ca3af;
+      --danger: #f97373;
+      --radius-lg: 16px;
+      --radius-xl: 24px;
+      --shadow-soft: 0 18px 45px rgba(15, 23, 42, 0.7);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: radial-gradient(circle at top, #1e293b 0, #020617 50%, #000 100%);
+      color: var(--text);
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text",
+        "Segoe UI", sans-serif;
+    }
+
+    .app-shell {
+      width: 100%;
+      max-width: 850px;
+      padding: 16px;
+    }
+
+    .card {
+      background: radial-gradient(circle at top left, #0b1220, #020617);
+      border-radius: var(--radius-xl);
+      box-shadow: var(--shadow-soft);
+      border: 1px solid rgba(148, 163, 184, 0.25);
+      padding: 18px 18px 20px;
+      backdrop-filter: blur(18px);
+    }
+
+    /* HEADER */
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 18px;
+    }
+
+    .title-block h1 {
+      margin: 0;
+      font-size: 1.4rem;
+      letter-spacing: 0.03em;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .title-badge {
+      font-size: 0.7rem;
+      padding: 3px 8px;
+      border-radius: 999px;
+      border: 1px solid rgba(148, 163, 184, 0.5);
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--muted);
+    }
+
+    .title-block p {
+      margin: 6px 0 0;
+      font-size: 0.8rem;
+      color: var(--muted);
+    }
+
+    /* STATUS CHIP (PING) */
+    .status {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 7px 11px;
+      border-radius: 999px;
+      background: rgba(15, 23, 42, 0.85);
+      border: 1px solid rgba(148, 163, 184, 0.4);
+      font-size: 0.75rem;
+      white-space: nowrap;
+    }
+
+    .status-dot {
+      width: 9px;
+      height: 9px;
+      border-radius: 999px;
+      background-color: var(--danger);
+      box-shadow: 0 0 0 4px rgba(248, 113, 113, 0.15);
+    }
+
+    .status-text {
+      font-weight: 500;
+    }
+
+    .status-label {
+      color: var(--muted);
+    }
+
+    .status-refresh {
+      border: none;
+      padding: 4px 8px;
+      border-radius: 999px;
+      font-size: 0.7rem;
+      background: rgba(15, 23, 42, 0.9);
+      color: var(--muted);
+      cursor: pointer;
+    }
+
+    .status-refresh:hover {
+      background: rgba(30, 64, 175, 0.9);
+      color: white;
+    }
+
+    @media (max-width: 700px) {
+      .header {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+    }
+
+    /* SLIDERS PANEL */
+    .sliders-panel {
+      background: radial-gradient(circle at top right, rgba(251, 191, 36, 0.08), rgba(15, 23, 42, 0.95));
+      border-radius: var(--radius-lg);
+      padding: 14px 14px 12px;
+      border: 1px solid rgba(148, 163, 184, 0.35);
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      max-height: 440px;
+      overflow: hidden;
+    }
+
+    .sliders-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      margin-bottom: 4px;
+    }
+
+    .sliders-title {
+      font-size: 0.82rem;
+      text-transform: uppercase;
+      letter-spacing: 0.16em;
+      color: var(--muted);
+    }
+
+    .sliders-summary {
+      font-size: 0.7rem;
+      color: var(--muted);
+      text-align: right;
+    }
+
+    .sliders-scroll {
+      overflow-y: auto;
+      padding-right: 4px;
+      scrollbar-width: thin;
+    }
+
+    .sliders-scroll::-webkit-scrollbar {
+      width: 4px;
+    }
+
+    .sliders-scroll::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    .sliders-scroll::-webkit-scrollbar-thumb {
+      background: rgba(148, 163, 184, 0.6);
+      border-radius: 999px;
+    }
+
+    .slider-row {
+      padding: 8px 9px 9px;
+      border-radius: 12px;
+      background: rgba(15, 23, 42, 0.9);
+      border: 1px solid rgba(30, 64, 175, 0.55);
+      margin-bottom: 7px;
+    }
+
+    .slider-row.row-not-editable {
+      opacity: 0.35;
+    }
+
+    .slider-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      font-size: 0.78rem;
+      margin-bottom: 4px;
+    }
+
+    .slider-label {
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    .slider-time {
+      font-feature-settings: "tnum" 1;
+      font-variant-numeric: tabular-nums;
+      font-size: 0.85rem;
+      font-weight: 500;
+    }
+
+    .slider-time small {
+      font-size: 0.7rem;
+      color: var(--muted);
+      margin-left: 5px;
+    }
+
+    .slider-line {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .slider-line .time-slider {
+      flex: 1;
+    }
+
+    .slider-checkbox {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 0.74rem;
+      color: var(--muted);
+      white-space: nowrap;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .slider-checkbox input {
+      accent-color: var(--accent);
+    }
+
+    .time-slider {
+      width: 100%;
+      -webkit-appearance: none;
+      appearance: none;
+      height: 4px;
+      border-radius: 999px;
+      background: linear-gradient(90deg, var(--accent), rgba(148, 163, 184, 0.2));
+      outline: none;
+      margin-top: 4px;
+    }
+
+    .time-slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: radial-gradient(circle, #e0f2fe, #38bdf8);
+      border: 2px solid #0f172a;
+      box-shadow: 0 0 0 5px rgba(56, 189, 248, 0.25);
+      cursor: pointer;
+      margin-top: -6px;
+    }
+
+    .time-slider::-moz-range-thumb {
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: radial-gradient(circle, #e0f2fe, #38bdf8);
+      border: 2px solid #0f172a;
+      box-shadow: 0 0 0 5px rgba(56, 189, 248, 0.25);
+      cursor: pointer;
+    }
+
+    .time-slider::-moz-range-track {
+      height: 4px;
+      border-radius: 999px;
+      background: linear-gradient(90deg, var(--accent), rgba(148, 163, 184, 0.2));
+    }
+
+    /* SUBMIT ROW (PASSWORD + BUTTON) */
+    .submit-row {
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+      margin-top: 8px;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .password-input {
+      min-width: 160px;
+      max-width: 220px;
+      padding: 7px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(148, 163, 184, 0.5);
+      background: rgba(15, 23, 42, 0.9);
+      color: var(--text);
+      font-size: 0.8rem;
+      outline: none;
+    }
+
+    .password-input::placeholder {
+      color: var(--muted);
+    }
+
+    .submit-btn {
+      border-radius: 999px;
+      border: 1px solid rgba(56, 189, 248, 0.8);
+      background: radial-gradient(circle at top left, var(--accent-soft-strong), rgba(15, 23, 42, 0.95));
+      color: var(--text);
+      font-size: 0.82rem;
+      font-weight: 500;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      padding: 8px 16px;
+      cursor: pointer;
+    }
+
+    .submit-btn:active {
+      transform: translateY(1px) scale(0.99);
+    }
+
+    .submit-btn[disabled] {
+      opacity: 0.6;
+      cursor: default;
+      transform: none;
+    }
+
+    /* STATUS PANEL FOR PLANT-WATER-STATUS */
+    .jobs-panel {
+      margin-top: 16px;
+      padding: 12px 14px 12px;
+      border-radius: var(--radius-lg);
+      border: 1px solid rgba(148, 163, 184, 0.35);
+      background: radial-gradient(circle at top, rgba(30, 64, 175, 0.2), rgba(15, 23, 42, 0.95));
+      font-size: 0.8rem;
+    }
+
+    .jobs-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+
+    .jobs-title {
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+      color: var(--muted);
+      font-size: 0.78rem;
+    }
+
+    .jobs-controls {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .jobs-refresh-btn {
+      border-radius: 999px;
+      border: 1px solid rgba(148, 163, 184, 0.7);
+      background: rgba(15, 23, 42, 0.9);
+      color: var(--text);
+      padding: 4px 10px;
+      font-size: 0.75rem;
+      cursor: pointer;
+    }
+
+    .jobs-refresh-btn:active {
+      transform: translateY(1px) scale(0.99);
+    }
+
+    .auto-refresh {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 0.75rem;
+      color: var(--muted);
+      white-space: nowrap;
+    }
+
+    .auto-refresh input {
+      accent-color: var(--accent);
+    }
+
+    .jobs-body {
+      border-top: 1px solid rgba(148, 163, 184, 0.35);
+      padding-top: 8px;
+      margin-top: 4px;
+      display: grid;
+      grid-template-columns: minmax(0, 1.1fr) minmax(0, 1.1fr);
+      gap: 12px;
+    }
+
+    @media (max-width: 720px) {
+      .jobs-body {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .jobs-section-title {
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+      margin-bottom: 4px;
+    }
+
+    .jobs-empty {
+      font-size: 0.78rem;
+      color: var(--muted);
+      font-style: italic;
+    }
+
+    .job-item {
+      padding: 4px 0;
+      border-bottom: 1px dashed rgba(148, 163, 184, 0.3);
+    }
+
+    .job-item:last-child {
+      border-bottom: none;
+    }
+
+    .job-id {
+      font-weight: 500;
+      margin-right: 4px;
+    }
+
+    .job-meta {
+      color: var(--muted);
+      font-size: 0.76rem;
+    }
+
+    .progress-row {
+      margin-top: 4px;
+      font-size: 0.76rem;
+      color: var(--muted);
+    }
+
+    .progress-bar-wrapper {
+      margin-top: 2px;
+      width: 100%;
+      height: 5px;
+      border-radius: 999px;
+      background: rgba(15, 23, 42, 0.8);
+      overflow: hidden;
+    }
+
+    .progress-bar-fill {
+      height: 100%;
+      width: 0%;
+      border-radius: 999px;
+      background: linear-gradient(90deg, var(--accent), rgba(56, 189, 248, 0.1));
+      transition: width 0.2s ease-out;
+    }
+
+    .footer-note {
+      margin-top: 10px;
+      font-size: 0.72rem;
+      color: var(--muted);
+      text-align: right;
+      opacity: 0.85;
+    }
+
+    @media (max-width: 480px) {
+      .card {
+        padding: 14px 12px 16px;
+      }
+      .title-block h1 {
+        font-size: 1.1rem;
+      }
+      .sliders-panel {
+        padding: 11px;
+      }
+      .footer-note {
+        text-align: left;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="app-shell">
+    <section class="card">
+      <header class="header">
+        <div class="title-block">
+          <h1>
+            Plant Water Scheduler Panel
+            <span class="title-badge">Plant Node A <code>[ESP8266]</code></span>
+          </h1>
+          <p>Set time and schedule for each water slots and monitor jobs.</p>
+        </div>
+
+        <div class="status" id="status-chip">
+          <span class="status-dot" id="status-dot"></span>
+          <span class="status-text" id="status-text">Checking…</span>
+          <span class="status-label" id="status-label">server</span>
+          <button class="status-refresh" id="status-refresh" type="button">
+            Refresh
+          </button>
+        </div>
+      </header>
+
+      <!-- SLIDERS + CHECKBOXES -->
+      <section class="sliders-panel">
+        <div class="sliders-header">
+          <div class="sliders-title">Water Channel Slots</div>
+          <div class="sliders-summary">
+            1–120 min · Check on right to select water channel Slot.
+          </div>
+        </div>
+
+        <div class="sliders-scroll">
+          <!-- Int0 -->
+          <div class="slider-row" data-slot-key="Int0">
+            <div class="slider-header">
+              <div class="slider-label">Indoor Level 0 [Int0]</div>
+              <div class="slider-time">
+                <span id="time-Int0">1</span>
+                <small>min</small>
+              </div>
+            </div>
+            <div class="slider-line">
+              <input
+                type="range"
+                min="1"
+                max="120"
+                value="1"
+                class="time-slider"
+                data-time-target="time-Int0"
+              />
+              <label class="slider-checkbox">
+                <input type="checkbox" class="slot-enable" />
+                <span>Use</span>
+              </label>
+            </div>
+          </div>
+
+          <!-- Int1 -->
+          <div class="slider-row" data-slot-key="Int1">
+            <div class="slider-header">
+              <div class="slider-label">Indoor Level 1 [Int1]</div>
+              <div class="slider-time">
+                <span id="time-Int1">1</span>
+                <small>min</small>
+              </div>
+            </div>
+            <div class="slider-line">
+              <input
+                type="range"
+                min="1"
+                max="120"
+                value="1"
+                class="time-slider"
+                data-time-target="time-Int1"
+              />
+              <label class="slider-checkbox">
+                <input type="checkbox" class="slot-enable" />
+                <span>Use</span>
+              </label>
+            </div>
+          </div>
+
+          <!-- Int2 -->
+          <div class="slider-row" data-slot-key="Int2">
+            <div class="slider-header">
+              <div class="slider-label">Indoor Level 2 [Int2]</div>
+              <div class="slider-time">
+                <span id="time-Int2">1</span>
+                <small>min</small>
+              </div>
+            </div>
+            <div class="slider-line">
+              <input
+                type="range"
+                min="1"
+                max="120"
+                value="1"
+                class="time-slider"
+                data-time-target="time-Int2"
+              />
+              <label class="slider-checkbox">
+                <input type="checkbox" class="slot-enable" />
+                <span>Use</span>
+              </label>
+            </div>
+          </div>
+
+          <!-- Int3 -->
+          <div class="slider-row" data-slot-key="Int3">
+            <div class="slider-header">
+              <div class="slider-label">Indoor Level 3 [Int3]</div>
+              <div class="slider-time">
+                <span id="time-Int3">1</span>
+                <small>min</small>
+              </div>
+            </div>
+            <div class="slider-line">
+              <input
+                type="range"
+                min="1"
+                max="120"
+                value="1"
+                class="time-slider"
+                data-time-target="time-Int3"
+              />
+              <label class="slider-checkbox">
+                <input type="checkbox" class="slot-enable" />
+                <span>Use</span>
+              </label>
+            </div>
+          </div>
+
+          <!-- Ext0 -->
+          <div class="slider-row" data-slot-key="Ext0">
+            <div class="slider-header">
+              <div class="slider-label">Outdoor Extra Point [Ext0]</div>
+              <div class="slider-time">
+                <span id="time-Ext0">1</span>
+                <small>min</small>
+              </div>
+            </div>
+            <div class="slider-line">
+              <input
+                type="range"
+                min="1"
+                max="120"
+                value="1"
+                class="time-slider"
+                data-time-target="time-Ext0"
+              />
+              <label class="slider-checkbox">
+                <input type="checkbox" class="slot-enable" />
+                <span>Use</span>
+              </label>
+            </div>
+          </div>
+
+          <!-- Ext1 -->
+          <div class="slider-row" data-slot-key="Ext1">
+            <div class="slider-header">
+              <div class="slider-label">Outdoor Below Window [Ext1]</div>
+              <div class="slider-time">
+                <span id="time-Ext1">1</span>
+                <small>min</small>
+              </div>
+            </div>
+            <div class="slider-line">
+              <input
+                type="range"
+                min="1"
+                max="120"
+                value="1"
+                class="time-slider"
+                data-time-target="time-Ext1"
+              />
+              <label class="slider-checkbox">
+                <input type="checkbox" class="slot-enable" />
+                <span>Use</span>
+              </label>
+            </div>
+          </div>
+
+          <!-- Ext2 -->
+          <div class="slider-row" data-slot-key="Ext2">
+            <div class="slider-header">
+              <div class="slider-label">Outdoor Big Plants [Ext2]</div>
+              <div class="slider-time">
+                <span id="time-Ext2">1</span>
+                <small>min</small>
+              </div>
+            </div>
+            <div class="slider-line">
+              <input
+                type="range"
+                min="1"
+                max="120"
+                value="1"
+                class="time-slider"
+                data-time-target="time-Ext2"
+              />
+              <label class="slider-checkbox">
+                <input type="checkbox" class="slot-enable" />
+                <span>Use</span>
+              </label>
+            </div>
+          </div>
+
+          <!-- Ext3 -->
+          <div class="slider-row" data-slot-key="Ext3">
+            <div class="slider-header">
+              <div class="slider-label">Outdoor Medium Plants [Ext3]</div>
+              <div class="slider-time">
+                <span id="time-Ext3">1</span>
+                <small>min</small>
+              </div>
+            </div>
+            <div class="slider-line">
+              <input
+                type="range"
+                min="1"
+                max="120"
+                value="1"
+                class="time-slider"
+                data-time-target="time-Ext3"
+              />
+              <label class="slider-checkbox">
+                <input type="checkbox" class="slot-enable" />
+                <span>Use</span>
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <div class="submit-row">
+          <input
+            type="password"
+            id="auth-password"
+            class="password-input"
+            placeholder="Password"
+            autocomplete="new-password"
+          />
+          <button class="submit-btn" id="submit-btn" type="button">
+            schedule
+          </button>
+        </div>
+      </section>
+
+      <!-- JOBS / STATUS SECTION -->
+      <section class="jobs-panel">
+        <div class="jobs-header">
+          <div class="jobs-title">Plant Water Status</div>
+          <div class="jobs-controls">
+            <button class="jobs-refresh-btn" id="jobs-refresh-btn" type="button">
+              Refresh
+            </button>
+            <label class="auto-refresh">
+              <input type="checkbox" id="jobs-auto-refresh" />
+              <span>Auto-refresh (10s)</span>
+            </label>
+          </div>
+        </div>
+
+        <div id="jobs-status-message" class="jobs-empty">
+          Loading status…
+        </div>
+
+        <div class="jobs-body" id="jobs-body" style="display: none;">
+          <div>
+            <div class="jobs-section-title">Running Job</div>
+            <div id="running-job-container"></div>
+          </div>
+          <div>
+            <div class="jobs-section-title">Scheduled Jobs</div>
+            <div id="scheduled-jobs-container"></div>
+          </div>
+        </div>
+
+        <div class="progress-row" id="overall-progress-row" style="display:none; margin-top:8px;">
+          Overall progress:
+          <span id="overall-progress-text">0%</span>
+          <div class="progress-bar-wrapper">
+            <div class="progress-bar-fill" id="overall-progress-bar"></div>
+          </div>
+        </div>
+      </section>
+
+      <div class="footer-note">
+        Copyright Sayansree Paria
+      </div>
+    </section>
+  </main>
+
+  <script>
+    // ======== CONFIG: which slots are editable ========
+    const SLOT_CONFIG = {
+      Int0: false,
+      Int1: false,
+      Int2: true,
+      Int3: false,
+      Ext0: false,
+      Ext1: false,
+      Ext2: true,
+      Ext3: true,
+    };
+    const SLOT_ORDER = ["Int0", "Int1", "Int2", "Int3", "Ext0", "Ext1", "Ext2", "Ext3"];
+
+// Sort sliders: editable (enabled in SLOT_CONFIG) first, then natural order
+(function sortSlidersByEnabled() {
+  const container = document.querySelector(".sliders-scroll");
+  if (!container) return;
+
+  const rows = Array.from(container.querySelectorAll(".slider-row"));
+
+  rows.sort((a, b) => {
+    const keyA = a.dataset.slotKey;
+    const keyB = b.dataset.slotKey;
+
+    const editableA = !!SLOT_CONFIG[keyA];
+    const editableB = !!SLOT_CONFIG[keyB];
+
+    // Editable (true) first
+    if (editableA !== editableB) {
+      return editableA ? -1 : 1;
+    }
+
+    // Within each group, keep natural Int/Ext order
+    return SLOT_ORDER.indexOf(keyA) - SLOT_ORDER.indexOf(keyB);
+  });
+
+  // Re-append in sorted order
+  rows.forEach((row) => container.appendChild(row));
+})();
+
+    // ======== Time slider display (minutes only) ========
+    document.querySelectorAll(".time-slider").forEach((slider) => {
+      const targetId = slider.getAttribute("data-time-target");
+      const targetEl = document.getElementById(targetId);
+
+      targetEl.textContent = slider.value;
+
+      slider.addEventListener("input", () => {
+        targetEl.textContent = slider.value;
+      });
+    });
+
+    // ======== Apply editability + checkbox behavior ========
+    document.querySelectorAll(".slider-row").forEach((row) => {
+      const key = row.dataset.slotKey;
+      const editable = !!SLOT_CONFIG[key];
+      const slider = row.querySelector(".time-slider");
+      const checkbox = row.querySelector(".slot-enable");
+
+      if (!editable) {
+        row.classList.add("row-not-editable");
+        slider.disabled = true;
+        checkbox.disabled = true;
+        checkbox.checked = false;
+      } else {
+        checkbox.checked = true;
+        slider.disabled = false;
+
+        checkbox.addEventListener("change", () => {
+          slider.disabled = !checkbox.checked;
+        });
+      }
+    });
+
+    // ======== URLs ========
+    const BASE_URL = "http://local.sayansree.com:8967";
+    const PING_URL = BASE_URL + "/ping";
+    const CALL1_URL = BASE_URL + "/plant-water";
+    const STATUS_URL = BASE_URL + "/plant-water-status";
+
+    // ======== Server status checker (GET /ping) ========
+    const statusDot = document.getElementById("status-dot");
+    const statusText = document.getElementById("status-text");
+    const statusLabel = document.getElementById("status-label");
+    const refreshBtn = document.getElementById("status-refresh");
+
+    function setStatus(isOnline) {
+      if (isOnline) {
+        statusDot.style.backgroundColor = "#22c55e";
+        statusDot.style.boxShadow = "0 0 0 5px rgba(34, 197, 94, 0.25)";
+        statusText.textContent = "Online";
+        statusLabel.textContent = "server healthy";
+      } else {
+        statusDot.style.backgroundColor = "#f97373";
+        statusDot.style.boxShadow = "0 0 0 5px rgba(248, 113, 113, 0.25)";
+        statusText.textContent = "Offline";
+        statusLabel.textContent = "check backend";
+      }
+    }
+
+    async function checkServerStatus() {
+      statusText.textContent = "Checking…";
+      statusLabel.textContent = "server";
+      try {
+        const res = await fetch(PING_URL, { method: "GET", cache: "no-store" });
+        setStatus(res.ok);
+      } catch (e) {
+        setStatus(false);
+      }
+    }
+
+    refreshBtn.addEventListener("click", checkServerStatus);
+    checkServerStatus();
+
+    // ======== Call 1 API submit (POST /plant-water, text/plain, auth header) ========
+    const submitBtn = document.getElementById("submit-btn");
+    const authInput = document.getElementById("auth-password");
+
+    submitBtn.addEventListener("click", async () => {
+      const rows = document.querySelectorAll(".slider-row");
+      const parts = [];
+
+      rows.forEach((row) => {
+        const key = row.dataset.slotKey;
+        const editable = !!SLOT_CONFIG[key];
+        if (!editable) return;
+
+        const slider = row.querySelector(".time-slider");
+        const checkbox = row.querySelector(".slot-enable");
+        if (!checkbox.checked) return;
+
+        const minutes = Number(slider.value);
+        const millis = minutes * 60000; // 1 min = 60000 ms
+        parts.push(`${key}:${millis}`);
+      });
+
+      const payload = parts.join("|");
+
+      submitBtn.disabled = true;
+      const originalText = submitBtn.textContent;
+      submitBtn.textContent = "Sending…";
+
+      const password = authInput.value || "";
+      const headers = {
+        "Content-Type": "text/plain",
+        auth: `${password}`,
+      };
+
+      try {
+        const res = await fetch(CALL1_URL, {
+          method: "POST",
+          headers,
+          body: payload,
+        });
+
+        if (res.ok) {
+          submitBtn.textContent = "Sent ✔";
+        } else {
+          submitBtn.textContent = "Error";
+        }
+      } catch (e) {
+        console.error(e);
+        submitBtn.textContent = "Error";
+      } finally {
+        setTimeout(() => {
+          submitBtn.textContent = originalText;
+          submitBtn.disabled = false;
+        }, 1200);
+      }
+    });
+
+    // ======== Plant-water-status section ========
+    const jobsStatusMessage = document.getElementById("jobs-status-message");
+    const jobsBody = document.getElementById("jobs-body");
+    const runningJobContainer = document.getElementById("running-job-container");
+    const scheduledJobsContainer = document.getElementById("scheduled-jobs-container");
+    const overallProgressRow = document.getElementById("overall-progress-row");
+    const overallProgressText = document.getElementById("overall-progress-text");
+    const overallProgressBar = document.getElementById("overall-progress-bar");
+    const jobsRefreshBtn = document.getElementById("jobs-refresh-btn");
+    const jobsAutoRefresh = document.getElementById("jobs-auto-refresh");
+
+    let autoRefreshTimer = null;
+
+    function formatMs(ms) {
+      return (ms/60000>=1)?`${Math.floor(ms/60000)} min`:``+ `${Math.floor(ms%60000/1000)} s`;
+    }
+
+    function formatPercent(p) {
+      return `${p.toFixed(1)}%`;
+    }
+
+    function renderJobsStatus(data) {
+      const { JobRunning, jobsScheduled } = data || {};
+
+      const hasRunning = JobRunning && JobRunning.time && JobRunning.time > 0;
+      const hasScheduled = Array.isArray(jobsScheduled) && jobsScheduled.length > 0;
+
+      if (!hasRunning && !hasScheduled) {
+        jobsBody.style.display = "none";
+        overallProgressRow.style.display = "none";
+        jobsStatusMessage.style.display = "block";
+        jobsStatusMessage.textContent = "No jobs currently running or scheduled.";
+        return;
+      }
+
+      jobsStatusMessage.style.display = "none";
+      jobsBody.style.display = "grid";
+
+      // Running job
+      runningJobContainer.innerHTML = "";
+      if (hasRunning) {
+        const job = JobRunning;
+        const progress = Math.max(
+          0,
+          Math.min(100, (job.timeProcessed / job.time) * 100)
+        );
+
+        const div = document.createElement("div");
+        div.className = "job-item";
+        div.innerHTML = `
+          <div>
+            <span class="job-id">Job #${job.JobId}</span>
+            <span class="job-meta">${formatMs(job.timeProcessed)} / ${formatMs(
+              job.time
+            )}</span>
+          </div>
+          <div class="progress-row">
+            Progress: <span>${formatPercent(progress)}</span>
+            <div class="progress-bar-wrapper">
+              <div class="progress-bar-fill" style="width:${progress}%;"></div>
+            </div>
+          </div>
+        `;
+        runningJobContainer.appendChild(div);
+      } else {
+        const div = document.createElement("div");
+        div.className = "jobs-empty";
+        div.textContent = "No job running.";
+        runningJobContainer.appendChild(div);
+      }
+
+      // Scheduled jobs
+      scheduledJobsContainer.innerHTML = "";
+      if (hasScheduled) {
+        jobsScheduled.forEach((job) => {
+          const item = document.createElement("div");
+          item.className = "job-item";
+          item.innerHTML = `
+            <div>
+              <span class="job-id">Job #${job.JobId}</span>
+              <span class="job-meta">Duration: ${formatMs(job.time)}</span>
+            </div>
+          `;
+          scheduledJobsContainer.appendChild(item);
+        });
+      } else {
+        const div = document.createElement("div");
+        div.className = "jobs-empty";
+        div.textContent = "No jobs scheduled.";
+        scheduledJobsContainer.appendChild(div);
+      }
+
+      // Overall progress (simple heuristic: timeProcessed / (running.time + sum scheduled.time))
+      if (hasRunning || hasScheduled) {
+        let total = 0;
+        let done = 0;
+        if (hasRunning) {
+          total += JobRunning.time || 0;
+          done += JobRunning.timeProcessed || 0;
+        }
+        if (hasScheduled) {
+          jobsScheduled.forEach((j) => {
+            total += j.time || 0;
+          });
+        }
+
+        if (total > 0) {
+          const overall = Math.max(0, Math.min(100, (done / total) * 100));
+          overallProgressRow.style.display = "block";
+          overallProgressText.textContent = formatPercent(overall);
+          overallProgressBar.style.width = `${overall}%`;
+        } else {
+          overallProgressRow.style.display = "none";
+        }
+      } else {
+        overallProgressRow.style.display = "none";
+      }
+    }
+
+    async function refreshJobsStatus() {
+      jobsStatusMessage.style.display = "block";
+      jobsStatusMessage.textContent = "Loading status…";
+
+      try {
+        const res = await fetch(STATUS_URL, { method: "GET", cache: "no-store" });
+        if (!res.ok) {
+          throw new Error("Status error: " + res.status);
+        }
+        const json = await res.json();
+        renderJobsStatus(json);
+      } catch (e) {
+        console.error(e);
+        jobsBody.style.display = "none";
+        overallProgressRow.style.display = "none";
+        jobsStatusMessage.style.display = "block";
+        jobsStatusMessage.textContent = "Failed to load status.";
+      }
+    }
+
+    jobsRefreshBtn.addEventListener("click", refreshJobsStatus);
+    refreshJobsStatus();
+
+    // Auto-refresh every 10s when checkbox is on
+    jobsAutoRefresh.addEventListener("change", () => {
+      if (jobsAutoRefresh.checked) {
+        refreshJobsStatus(); // immediate
+        autoRefreshTimer = setInterval(refreshJobsStatus, 10000);
+      } else {
+        if (autoRefreshTimer) {
+          clearInterval(autoRefreshTimer);
+          autoRefreshTimer = null;
+        }
+      }
+    });
+
+    window.addEventListener("beforeunload", () => {
+      if (autoRefreshTimer) {
+        clearInterval(autoRefreshTimer);
+      }
+    });
+  </script>
+</body>
+</html>
