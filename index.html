@@ -3,6 +3,31 @@
 <head>
   <meta charset="UTF-8" />
   <title>Scheduler Control Panel</title>
+  <meta name="description" content="A minimal, responsive dashboard to schedule and monitor plant watering cycles. Includes job status, automation timers, and real-time device health monitoring.">
+
+<meta name="keywords" content="plant watering automation, irrigation controller, watering scheduler, automation dashboard, IoT plant water system, local control panel, watering timer interface">
+<meta name="author" content="SayanSree Paria">
+<meta name="robots" content="index">
+<!-- Open Graph -->
+<meta property="og:title" content="Smart Plant Watering Controller" />
+<meta property="og:description" content="Control and monitor plant watering schedules, running jobs, and automation timing from a clean responsive panel." />
+<meta property="og:type" content="website" />
+<meta property="og:url" content="https://plant.sayansree.com/" />
+<meta property="og:image" content="/assets/plant.png" />
+<meta property="og:site_name" content="Plant Watering Control Panel" />
+<!-- Twitter -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Smart Plant Watering Controller" />
+<meta name="twitter:description" content="Schedule and monitor plant watering cycles with job progress and automation tools." />
+<meta name="twitter:image" content="/assets/plant.png" />
+<!-- Favicon -->
+<link rel="icon" type="image/png" href="/assets/plant.png">
+<link rel="apple-touch-icon" href="/assets/plant198.png">
+
+<!-- Web App Manifest -->
+
+<meta name="theme-color" content="#0f172a" />
+  <link rel="canonical" href="https://plant.sayansree.com/">
   <meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <style>
@@ -791,7 +816,7 @@
   <script>
     // ======== CONFIG: which slots are editable ========
     const SLOT_CONFIG = {
-      Int0: false,
+      Int0: true,
       Int1: false,
       Int2: true,
       Int3: false,
@@ -1123,5 +1148,4 @@
   </script>
 </body>
 </html>
-
 
